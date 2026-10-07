@@ -3,7 +3,9 @@ package org.example.ebankservice.service;
 import org.example.ebankservice.DTO.BankAccountRequestDTO;
 import org.example.ebankservice.DTO.BankAccountResponseDTO;
 import org.example.ebankservice.entity.BankAccount;
+import org.example.ebankservice.feign.CustomerRestClient;
 import org.example.ebankservice.mappers.BankAccountMapper;
+import org.example.ebankservice.model.Customer;
 import org.example.ebankservice.repository.BankAccountRepository;
 
 import org.springframework.stereotype.Service;
@@ -21,17 +23,25 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     private final BankAccountRepository bankAccountRepository;
     private final BankAccountMapper bankAccountMapper;
+    private final CustomerRestClient customerRestClient;
 
-    public BankAccountServiceImpl(BankAccountRepository bankAccountRepository, BankAccountMapper bankAccountMapper) {
+    public BankAccountServiceImpl(BankAccountRepository bankAccountRepository, BankAccountMapper bankAccountMapper, CustomerRestClient customerRestClient) {
         this.bankAccountRepository = bankAccountRepository;
         this.bankAccountMapper = bankAccountMapper;
+        this.customerRestClient = customerRestClient;
     }
 
     @Override
     public BankAccountResponseDTO addAccount(BankAccountRequestDTO requestDTO) {
-        BankAccount bankAccount = bankAccountMapper.toEntity(requestDTO);
-        BankAccount savedAccount = bankAccountRepository.save(bankAccount);
-        return bankAccountMapper.toDTO(savedAccount);
+        try{
+            customerRestClient.getCustomerById(String.valueOf(requestDTO.getCustomerId()));
+            BankAccount bankAccount = bankAccountMapper.toEntity(requestDTO);
+            BankAccount savedAccount = bankAccountRepository.save(bankAccount);
+            return bankAccountMapper.toDTO(savedAccount);
+        } catch (Exception e) {
+            throw new RuntimeException("Le client avec l'ID " + requestDTO.getCustomerId() + " n'existe pas.");
+        }
+
     }
 
     @Override
@@ -39,6 +49,8 @@ public class BankAccountServiceImpl implements BankAccountService {
     public BankAccountResponseDTO getAccountById(String id) {
         BankAccount bankAccount = bankAccountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Compte non trouvé avec l'id : " + id));
+        bankAccount.setCustomer(
+                customerRestClient.getCustomerById(String.valueOf(bankAccount.getCustomerId())));
         return bankAccountMapper.toDTO(bankAccount);
     }
 

@@ -20,6 +20,7 @@ public class BankAccountMapper {
                 .currency(bankAccount.getCurrency())
                 .type(bankAccount.getType())
                 .customerId(bankAccount.getCustomerId())
+                .customer(bankAccount.getCustomer())
                 .build();
     }
 
