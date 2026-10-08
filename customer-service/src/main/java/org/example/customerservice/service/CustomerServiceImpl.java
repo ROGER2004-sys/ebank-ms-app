@@ -8,6 +8,8 @@ import org.example.customerservice.mappers.CustomerMapper;
 import org.example.customerservice.repository.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.mcp.annotation.McpTool;
+import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +29,8 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerMapper customerMapper;
 
     @Override
-    public CustomerResponseDTO createCustomer(CustomerRequestDTO requestDTO) {
+    @McpTool(description = "Create a new customer")
+    public CustomerResponseDTO createCustomer(@McpToolParam(description = "The customer to save") CustomerRequestDTO requestDTO) {
         if (customerRepository.existsByEmail(requestDTO.getEmail())) {
             throw new RuntimeException("Un client avec cet email existe déjà.");
         }
@@ -38,7 +41,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional(readOnly = true)
-    public CustomerResponseDTO getCustomerById(Long id) {
+    @McpTool(description = "Get a customer by ID")
+    public CustomerResponseDTO getCustomerById(@McpToolParam(description = "The ID of the customer") Long id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Client non trouvé avec l'id : " + id));
         return customerMapper.toDTO(customer);
@@ -46,6 +50,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional(readOnly = true)
+    @McpTool(description = "Get all customers")
     public List<CustomerResponseDTO> getAllCustomers() {
         return customerRepository.findAll().stream()
                 .map(customerMapper::toDTO)
@@ -53,7 +58,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO requestDTO) {
+    @McpTool(description = "Update a customer")
+    public CustomerResponseDTO updateCustomer(@McpToolParam(description = "The ID of the customer") Long id, @McpToolParam(description = "The updated customer data") CustomerRequestDTO requestDTO) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Client non trouvé avec l'id : " + id));
 
@@ -63,7 +69,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deleteCustomer(Long id) {
+    @McpTool(description = "Delete a customer")
+    public void deleteCustomer(@McpToolParam(description = "The ID of the customer") Long id) {
         if (!customerRepository.existsById(id)) {
             throw new RuntimeException("Client non trouvé avec l'id : " + id);
         }

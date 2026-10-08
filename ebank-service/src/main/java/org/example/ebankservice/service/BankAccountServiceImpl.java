@@ -8,6 +8,8 @@ import org.example.ebankservice.mappers.BankAccountMapper;
 import org.example.ebankservice.model.Customer;
 import org.example.ebankservice.repository.BankAccountRepository;
 
+import org.springframework.ai.mcp.annotation.McpTool;
+import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +34,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    @McpTool(description = "Add a new bank account")
     public BankAccountResponseDTO addAccount(BankAccountRequestDTO requestDTO) {
         try{
             customerRestClient.getCustomerById(String.valueOf(requestDTO.getCustomerId()));
@@ -45,8 +48,9 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    @McpTool(description = "Get a bank account by its ID")
     @Transactional(readOnly = true)
-    public BankAccountResponseDTO getAccountById(String id) {
+    public BankAccountResponseDTO getAccountById(@McpToolParam(description = "ID of the bank account to retrieve") String id) {
         BankAccount bankAccount = bankAccountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Compte non trouvé avec l'id : " + id));
         bankAccount.setCustomer(
@@ -56,6 +60,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Override
     @Transactional(readOnly = true)
+    @McpTool(description = "Get all bank accounts")
     public List<BankAccountResponseDTO> getAllAccounts() {
         return bankAccountRepository.findAll().stream()
                 .map(bankAccountMapper::toDTO)
@@ -64,14 +69,17 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BankAccountResponseDTO> getAccountsByCustomerId(Long customerId) {
+    @McpTool(description = "Get bank accounts by customer ID")
+    public List<BankAccountResponseDTO> getAccountsByCustomerId(@McpToolParam(description = "ID of the customer") Long customerId) {
         return bankAccountRepository.findByCustomerId(customerId).stream()
                 .map(bankAccountMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public BankAccountResponseDTO updateAccount(String id, BankAccountRequestDTO requestDTO) {
+    @McpTool(description = "Update a bank account")
+    public BankAccountResponseDTO updateAccount(@McpToolParam(description = "ID of the bank account to update") String id
+            , @McpToolParam(description = "Updated bank account details") BankAccountRequestDTO requestDTO) {
         BankAccount bankAccount = bankAccountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Compte non trouvé avec l'id : " + id));
 
@@ -84,7 +92,8 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    public void deleteAccount(String id) {
+    @McpTool(description = "Delete a bank account")
+    public void deleteAccount(@McpToolParam(description = "ID of the bank account to delete") String id) {
         if (!bankAccountRepository.existsById(id)) {
             throw new RuntimeException("Compte non trouvé avec l'id : " + id);
         }
