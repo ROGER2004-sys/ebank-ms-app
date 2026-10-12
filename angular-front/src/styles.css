@@ -1,0 +1,27 @@
+
+
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.min.css";
+/* You can add global styles to this file, and also import other style files */
+
+.bot-response {
+  overflow-x: auto;
+}
+
+.bot-response table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+}
+
+.bot-response th,
+.bot-response td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #dee2e6;
+  text-align: left;
+}
+
+.bot-response thead,
+.bot-response tr:first-child {
+  background-color: #f8f9fa;
+}

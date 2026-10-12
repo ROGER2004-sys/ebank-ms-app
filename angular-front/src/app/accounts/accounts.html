@@ -1,0 +1,40 @@
+<div>
+  <h2>Accounts</h2>
+  @if(loadservice.isLoading()) {
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  } @else {
+    <button (click)="loadAccounts()">Charger les comptes</button>
+  }
+  @if (accounts$ | async; as state) {
+    @if (state.status === 'LOADING') {
+      <p role="status">Chargement des comptes...</p>
+    } @else if (state.status === 'ERROR') {
+      <p role="alert">{{ state.errorMessage }}</p>
+    } @else {
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date de creation</th>
+            <th>Type</th>
+            <th>Balance</th>
+            <th>Customer ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (account of state.accounts ?? []; track account.id) {
+            <tr>
+              <td>{{ account.id }}</td>
+              <td>{{ account.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ account.type }}</td>
+              <td>{{ account.balance }}</td>
+              <td>{{ account.customerId }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</div>
