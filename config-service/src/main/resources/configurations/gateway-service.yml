@@ -5,7 +5,7 @@ spring:
         webflux:
           routes:
             - id: ebank-bot
-              uri: http://localhost:8066
+              uri: http://localhost:${EBANK_BOT_PORT:8066}
               predicates:
                 - Path=/ebank-bot/**
               filters:
